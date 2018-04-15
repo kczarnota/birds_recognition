@@ -3,8 +3,9 @@ from PIL import Image
 
 image_size = 224
 
+
 def load_bounding_boxes(file_name):
-    bb = {} #map form filename to bouding box
+    bb = {}  # map form filename to bouding box
     with open(file_name) as f:
         for line in f:
             line = line.strip()
@@ -33,15 +34,16 @@ def load_bounding_boxes(file_name):
 #                    if new_width != height:
 #                        w += abs(new_width - height)
 #
-            bb[filename.replace('-', '')] = (x,y,w,h)
+            bb[filename.replace('-', '')] = (x, y, w, h)
 
     return bb
+
 
 def collect_files_names(root_dir):
     coll = {}
     for root, subdirs, files in os.walk(root_dir):
         for f in files:
-            f, ext = os.path.splitext(f)# remove jpg extension
+            f, ext = os.path.splitext(f)  # remove jpg extension
             if ext == '.jpg':
                 coll[f] = root
 
@@ -73,4 +75,3 @@ fn = collect_files_names('../data/')
 bb = load_bounding_boxes('../data/bounding_boxes.txt')
 
 extract_bounding_boxes_from_images(bb, fn, '../data/BBPP')
-
