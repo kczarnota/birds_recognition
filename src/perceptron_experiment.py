@@ -45,19 +45,26 @@ def run_experiment():
     y_train = keras.utils.to_categorical(y_train, num_classes)
     y_test = keras.utils.to_categorical(y_test, num_classes)
 
-    model = get_model(input_shape, num_classes, 5, 16)
-    model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=keras.optimizers.Adadelta(),
-                  metrics=['accuracy'])
+    scores = []
 
-    model.fit(X_train, y_train,
-              batch_size=batch_size,
-              epochs=epochs,
-              verbose=1,
-              validation_data=(X_test, y_test))
-    score = model.evaluate(X_test, y_test, verbose=0)
-    print('Test loss:', score[0])
-    print('Test accuracy:', score[1])
+    for i in range(1, 6):
+        model = get_model(input_shape, num_classes, i, 16)
+        model.compile(loss=keras.losses.categorical_crossentropy,
+                      optimizer=keras.optimizers.Adadelta(),
+                      metrics=['accuracy'])
+
+        model.fit(X_train, y_train,
+                  batch_size=batch_size,
+                  epochs=epochs,
+                  verbose=1,
+                  validation_data=(X_test, y_test))
+        score = model.evaluate(X_test, y_test, verbose=0)
+        scores.append(score[1])
+        print('Test loss:', score[0])
+        print('Test accuracy:', score[1])
+
+    for i in range(len(scores)):
+        print('{} layers test accuracy: {}'.format(i + 1, scores[i]))
 
 
 if __name__ == '__main__':
