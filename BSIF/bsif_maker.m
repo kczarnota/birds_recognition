@@ -37,7 +37,7 @@ for class_index = 1:numel(class_list)
         % normalized BSIF code word histogram
         bsifhistnorm(image_index,1:vector_feature_length)=bsif(gray_img, ICAtextureFilters,'nh');
         % class label
-        bsifhistnorm(image_index,vector_feature_length+1)=class_index;
+        bsifhistnorm(image_index,vector_feature_length+1)=class_index - 1;
 
         % jako plik matlaba
         %save([out_put '/' image_name '.mat'], bsifhist)

@@ -63,10 +63,8 @@ def extract_bounding_boxes_from_images(bb_list, file_names, output_dir):
             orginal_image_file_name = os.path.join(path, f + ".jpg")
             img = Image.open(orginal_image_file_name)
             img2 = img.crop(bb_list[f])
-            img2 = img2.resize((image_size, image_size), Image.ANTIALIAS)
-            rgb_image = Image.new("RGB", img2.size)
-            rgb_image.paste(img2)
-            rgb_image.save(output_file_name)
+            #img2 = img2.resize((image_size, image_size), Image.ANTIALIAS)
+            img2.save(output_file_name)
         except Exception as e:
             print(e)
 
