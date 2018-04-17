@@ -16,8 +16,6 @@ def load_data(trening_test_ratio=0.8):
     y_train = array[:training_set_size, -1:].flatten().astype(dtype=np.int32)
     X_test = array[training_set_size + 1:, :-1]
     y_test = array[training_set_size + 1:, -1:].flatten().astype(dtype=np.int32)
-    y_train -= 1
-    y_test -= 1
     return X_train, y_train, X_test, y_test
 
 
