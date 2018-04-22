@@ -6,7 +6,7 @@ out_put = '';
 filename='./texturefilters/ICAtextureFilters_17x17_8bit';
 load(filename, 'ICAtextureFilters');
 
-vector_feature_length = 2^size(ICAtextureFilters,3);
+vector_feature_length =  224*224*1;
 
 class_list = dir([in_put '0*']);
 
@@ -24,9 +24,16 @@ for class_index = 1:numel(class_list)
 
         gray_img = imread([in_put '/' class_name '/' image_list(image_index).name]);
 
+        transformation_type = 'im';
+
+        t=cputime;
         if ndims(gray_img) != 2
             gray_img = rgb2gray(gray_img);
-        endif
+        end
+        features = bsif(gray_img, ICAtextureFilters, transformation_type);
+        features = features(:);
+
+        printf('Total cpu time: %f seconds\n', cputime-t);
 
         % the image with grayvalues replaced by the BSIF bitstrings
         % bsifcodeim= bsif(gray_img,ICAtextureFilters,'im');
@@ -35,14 +42,16 @@ for class_index = 1:numel(class_list)
         % bsifhist=bsif(gray_img,ICAtextureFilters,'h');
 
         % normalized BSIF code word histogram
-        bsifhistnorm(image_index,1:vector_feature_length)=bsif(gray_img, ICAtextureFilters,'nh');
+
+        bsifhistnorm(image_index,1:vector_feature_length) = features;
+
         % class label
-        class_index -1 
+        class_index -1
         bsifhistnorm(image_index,vector_feature_length+1)=class_index-1;
 
         % jako plik matlaba
         %save([out_put '/' image_name '.mat'], bsifhist)
     end
-    save("-append", "bsifhistnorm_features_gray_cube.mat", "bsifhistnorm");
+    save("-append", "bsifhistnorm_features_gray_vector.mat", "bsifhistnorm");
 end
 
