@@ -7,14 +7,15 @@ import pandas as pd
 PARAMETERS = [[30], [10, 20], [5, 10, 15], [3, 6, 9, 12], [2, 4, 5, 8, 10]]
 
 
-def load_data(train_ratio=0.8, valid_ratio=0.1):
+def load_data(train_ratio=0.9, valid_ratio=0.1):
     if train_ratio + valid_ratio > 1.0:
         raise ValueError()
 
-    df = pd.read_csv('../BSIF/bsifhistnorm_features_nh_rgb_cube.csv')
+    df = pd.read_csv('../BSIF/bsifhistnorm_features_nh_rgb_cube.csv',  header=None)
     array = df.values
     class_labels = np.unique(array[:,-1].astype(np.int32))
     print("Data loading done")
+    print("Loaded {} samples splitted into {} classes".format(array.shape[0], class_labels.shape[0]))
 
     X_train = np.empty((0, array.shape[1] - 1))
     y_train = np.empty((0,1))
@@ -29,6 +30,7 @@ def load_data(train_ratio=0.8, valid_ratio=0.1):
         np.random.shuffle(class_samples)
 
         training_set_size = int(train_ratio * class_samples.shape[0])
+
         if float(training_set_size) != train_ratio * class_samples.shape[0]:
             training_set_size += 1
 
@@ -45,11 +47,12 @@ def load_data(train_ratio=0.8, valid_ratio=0.1):
         X_train_class = class_samples[:training_set_size, :-1]
         y_train_class = class_samples[:training_set_size, -1:].astype(dtype=np.int32)
 
-        X_valid_class = class_samples[(training_set_size + 1):training_set_size + 1 + validation_set_size, :-1]
-        y_valid_class = class_samples[(training_set_size + 1):training_set_size + 1 + validation_set_size:, -1:].astype(dtype=np.int32)
+        X_valid_class = class_samples[training_set_size:training_set_size + validation_set_size, :-1]
+        y_valid_class = class_samples[training_set_size:training_set_size + validation_set_size, -1:].astype(dtype=np.int32)
 
-        X_test_class = class_samples[-test_set_size:, :-1]
-        y_test_class = class_samples[-test_set_size:, -1:].astype(dtype=np.int32)
+        if test_set_size != 0:
+            X_test_class = class_samples[-test_set_size:, :-1]
+            y_test_class = class_samples[-test_set_size:, -1:].astype(dtype=np.int32)
 
 
         X_train = np.append(X_train, X_train_class, axis=0)
@@ -58,8 +61,9 @@ def load_data(train_ratio=0.8, valid_ratio=0.1):
         X_valid = np.append(X_valid, X_valid_class, axis=0)
         y_valid = np.append(y_valid, y_valid_class, axis=0)
 
-        X_test = np.append(X_test, X_test_class, axis=0)
-        y_test = np.append(y_test, y_test_class, axis=0)
+        if test_set_size != 0:
+            X_test = np.append(X_test, X_test_class, axis=0)
+            y_test = np.append(y_test, y_test_class, axis=0)
 
     return X_train, y_train, X_valid, y_valid, X_test, y_test
 
@@ -75,7 +79,7 @@ def get_model(input_shape, num_classes, hidden_layers_number, base):
 
 
 def run_experiment():
-    batch_size = 10
+    batch_size = 16
     num_classes = 50
     epochs = 256
 
@@ -95,7 +99,8 @@ def run_experiment():
         model = get_model(input_shape, num_classes, i, 16)
         model.compile(loss=keras.losses.categorical_crossentropy,
                       #optimizer=keras.optimizers.Adadelta(),
-                      optimizer='rmsprop',
+                      #optimizer='rmsprop',
+                      optimizer='adam',
                       metrics=['accuracy'])
 
         model.fit(X_train, y_train,
@@ -104,7 +109,7 @@ def run_experiment():
                   shuffle=True,
                   verbose=1,
                   validation_data=(X_valid, y_valid))
-        score = model.evaluate(X_test, y_test, verbose=0)
+        score = model.evaluate(X_valid, y_valid, verbose=0)
         scores.append(score[1])
         print('Test loss:', score[0])
         print('Test accuracy:', score[1])
