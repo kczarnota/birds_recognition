@@ -3,6 +3,9 @@ from keras.layers import Dense, Dropout
 import keras
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 PARAMETERS = [[30], [10, 20], [5, 10, 15], [3, 6, 9, 12], [2, 4, 5, 8, 10]]
 
@@ -11,7 +14,7 @@ def load_data(train_ratio=0.9, valid_ratio=0.1):
     if train_ratio + valid_ratio > 1.0:
         raise ValueError()
 
-    df = pd.read_csv('../BSIF/bsifhistnorm_features_nh_rgb_cube.csv',  header=None)
+    df = pd.read_csv('../BSIF/bsifhistnorm_features_gray_cube.csv',  header=None)
     array = df.values
     class_labels = np.unique(array[:,-1].astype(np.int32))
     print("Data loading done")
@@ -78,6 +81,28 @@ def get_model(input_shape, num_classes, hidden_layers_number, base):
     return model
 
 
+def save_plot(history, num_layers):
+    plt.plot(history.history['categorical_accuracy'])
+    plt.plot(history.history['val_categorical_accuracy'])
+    plt.plot(history.history['top_k_categorical_accuracy'])
+    plt.plot(history.history['val_top_k_categorical_accuracy'])
+    plt.title('Dokładność (liczba warstw = {})'.format(num_layers))
+    plt.ylabel('Dokładność')
+    plt.xlabel('Epoka')
+    plt.legend(['top 1 train', 'top 1 val', 'top 5 train', 'top 5 val'], loc='upper left')
+    plt.savefig('acc_layers_{}.pdf'.format(num_layers))
+    plt.close()
+
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Loss (liczba warstw = {})'.format(num_layers))
+    plt.ylabel('Loss')
+    plt.xlabel('Epoka')
+    plt.legend(['train', 'val'], loc='upper left')
+    plt.savefig('loss_layers_{}.pdf'.format(num_layers))
+    plt.close()
+
+
 def run_experiment():
     batch_size = 16
     num_classes = 50
@@ -101,14 +126,17 @@ def run_experiment():
                       #optimizer=keras.optimizers.Adadelta(),
                       #optimizer='rmsprop',
                       optimizer='adam',
-                      metrics=['accuracy'])
+                      metrics=['categorical_accuracy', 'top_k_categorical_accuracy'])
 
-        model.fit(X_train, y_train,
+        history = model.fit(X_train, y_train,
                   batch_size=batch_size,
                   epochs=epochs,
                   shuffle=True,
                   verbose=1,
                   validation_data=(X_valid, y_valid))
+
+        save_plot(history, i)
+
         score = model.evaluate(X_valid, y_valid, verbose=0)
         scores.append(score[1])
         print('Test loss:', score[0])
