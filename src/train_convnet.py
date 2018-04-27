@@ -132,7 +132,8 @@ if __name__ == '__main__':
     model = BirdsResNet50(input_shape=(224, 224, 3), classes_no=len(birds_data_manager.classes),
                           fine_tune=True)
 
-    model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['mse', 'accuracy'])
+    model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
+                  metrics=['categorical_accuracy', 'top_k_categorical_accuracy'])
     model.fit_generator(generator=train_generator.generate(), steps_per_epoch=20, epochs=20,
                     validation_data=test_generator.generate(), validation_steps=5)
 
