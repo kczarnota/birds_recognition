@@ -68,6 +68,7 @@ class BirdsDataGenerator(object):
         idx = 0
         for index in indexes_batch:
             image = Image.open(self.data[index][0]).resize((self.width, self.height), Image.LANCZOS)
+            image = image.convert("RGB")
             w = np.random.randint(0, self.width - self.crop_width + 1)
             h = np.random.randint(0, self.height - self.crop_height + 1)
             image_crop = image.crop((w, h, w + self.crop_width, h + self.crop_height))
@@ -85,7 +86,7 @@ class BirdsDataGenerator(object):
 
         while True:
             indexes = self.get_exploration_order()
-            for i in xrange(max_iter):
+            for i in range(max_iter):
                 indexes_batch = indexes[i * self.batch_size: (i + 1) * self.batch_size]
                 x_data, y_data = self.data_generation(indexes_batch)
                 yield x_data, y_data
@@ -116,7 +117,8 @@ def BirdsResNet50(input_shape, classes_no, fine_tune=False):
     return model
 
 
-root_directory = '/home/tomasz/Pictures/Datasets/birds'
+#root_directory = '../data/SET_A'
+root_directory = '../data/BBPP'
 
 if __name__ == '__main__':
     np.random.seed(4)
@@ -137,4 +139,4 @@ if __name__ == '__main__':
     model.fit_generator(generator=train_generator.generate(), steps_per_epoch=20, epochs=20,
                     validation_data=test_generator.generate(), validation_steps=5)
 
-    model.save('birdsmodel.h5')
+    model.save('birdsmodel_bounding.h5')
