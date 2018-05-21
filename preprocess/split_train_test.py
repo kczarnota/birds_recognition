@@ -4,7 +4,7 @@ import argparse
 import shutil
 from random import randint
 import random
-from shutil import copyfile
+from shutil import move
 
 parser = argparse.ArgumentParser(description='SNR bounding box extraction and data argumentation.')
 parser.add_argument("-ratio", default=0.8, type=float, help="Train/test size ratio")
@@ -27,6 +27,7 @@ for root, subdirs, files in os.walk(args.i):
             num_files_in_dir = len(files)
             list_of_files = files
 
+
         new_class_dir_train = os.path.join(args.o, 'train', cls)
         new_class_dir_test = os.path.join(args.o, 'test', cls)
         if not os.path.exists(new_class_dir_train):
@@ -37,23 +38,16 @@ for root, subdirs, files in os.walk(args.i):
         num_files_in_train = int(num_files_in_dir * args.ratio)
         num_files_in_test = num_files_in_dir - num_files_in_train
 
-        train_files = []
-        test_files = []
+        random.shuffle(list_of_files)
 
-        for i in range(num_files_in_train):
-            index = random.randint(0, len(list_of_files) - 1)
-            train_files.append(list_of_files[index])
-            del list_of_files[index]
-
-        for fn in list_of_files:
-            test_files.append(fn)
-
+        train_files = list_of_files[0:num_files_in_train]
+        test_files = list_of_files[num_files_in_train:]
 
         for fn in train_files:
-            copyfile(os.path.join(args.i,  cls, fn), os.path.join(args.o, 'train', cls, fn))
+            move(os.path.join(args.i,  cls, fn), os.path.join(args.o, 'train', cls, fn))
 
         for fn in test_files:
-            copyfile(os.path.join(args.i,  cls, fn), os.path.join(args.o, 'test', cls, fn))
+            move(os.path.join(args.i,  cls, fn), os.path.join(args.o, 'test', cls, fn))
 
 
 

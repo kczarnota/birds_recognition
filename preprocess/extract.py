@@ -143,7 +143,6 @@ def extract_bounding_boxes_from_images(bb_list, file_names, output_dir):
         argumented_images, argumented_bounding_boxes = do_argumentation(img, bb_list[f])
         i = 0
         for image, box in zip(argumented_images, argumented_bounding_boxes):
-            print(i)
             new_bb = fit_bounding_box(image.size, box)
             output_file_name = os.path.join(new_class_dir, f + str(i) + ".jpg")
             i += 1
@@ -153,7 +152,7 @@ def extract_bounding_boxes_from_images(bb_list, file_names, output_dir):
                 img2 = img2.resize((image_size, image_size), Image.ANTIALIAS)
                 rgb_image = Image.new("RGB", img2.size)
                 rgb_image.paste(img2)
-                if args.add_noise:
+                if args.noise:
                     rgb_image = add_noise(rgb_image)
                 rgb_image.save(output_file_name)
             else:
@@ -162,7 +161,7 @@ def extract_bounding_boxes_from_images(bb_list, file_names, output_dir):
                 draw = ImageDraw.Draw(rgb_image)
                 draw_rectangle(draw, [(new_bb[0], new_bb[1]), (new_bb[2], new_bb[3])], color=(255,0,0), width=5)
                 del draw
-                if args.add_noise:
+                if args.noise:
                     rgb_image = add_noise(rgb_image)
                 rgb_image.save(output_file_name)
 
