@@ -6,7 +6,7 @@ from random import randint
 import random
 from shutil import move
 
-parser = argparse.ArgumentParser(description='SNR bounding box extraction and data argumentation.')
+parser = argparse.ArgumentParser(description='Split data between test and train sets by ratio.')
 parser.add_argument("-ratio", default=0.8, type=float, help="Train/test size ratio")
 parser.add_argument("-i", help="Input dir")
 parser.add_argument("-o", help="Output dir")

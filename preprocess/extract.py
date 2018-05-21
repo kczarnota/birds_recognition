@@ -6,7 +6,7 @@ from random import randint
 import random
 
 
-parser = argparse.ArgumentParser(description='SNR bounding box extraction and data argumentation.')
+parser = argparse.ArgumentParser(description='Bounding box extraction and data argumentation.')
 parser.add_argument("-i", help="Input dir")
 parser.add_argument("-b", help="Bounding boxes file")
 parser.add_argument("-o", help="Output dir")

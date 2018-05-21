@@ -38,7 +38,58 @@ python mat2csv.py bsifhistnorm_features_rgb_cube.mat > bsifhistnorm_features_rgb
 python perceptron_experiment.py
 ```
 
-## Convnet 
+## Preprocessing scripts
+
+- add_overrite.py - draws random rectangle on every image from dir
+    ```
+    usage: add_override.py [-h] [-i I]
+
+    Add random black rectangle for every file in input dir.
+
+    optional arguments:
+    -h, --help  show this help message and exit
+    -i I        Input dir
+    ```
+
+- extract.py - script for crop extraction using bounding boxes and for static data argumentation
+    ```
+    usage: extract.py [-h] [-i I] [-b B] [-o O] [-f] [--translate TRANSLATE]
+                    [--rotate ROTATE] [--translate-rotate TRANSLATE_ROTATE]
+                    [--debug] [--square] [--noise]
+
+    Bounding box extraction and data argumentation.
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -i I                  Input dir
+    -b B                  Bounding boxes file
+    -o O                  Output dir
+    -f                    Force overwrite
+    --translate TRANSLATE
+                            How many times to do translate argumentation
+    --rotate ROTATE       How many times to do rotate argumentation
+    --translate-rotate TRANSLATE_ROTATE
+                            How many times to do translate + rotate argumentation
+    --debug               Debug mode
+    --square              Crop square
+    --noise               Add noise
+
+    ```
+- spilt_train_test.py - moves files from input dir to output but splits them between train and test dirs using ratio argument
+    ```
+    usage: split_train_test.py [-h] [-ratio RATIO] [-i I] [-o O]
+
+    Split data between test and train sets by ratio.
+
+    optional arguments:
+    -h, --help    show this help message and exit
+    -ratio RATIO  Train/test size ratio
+    -i I          Input dir
+    -o O          Output dir
+
+    ```
+
+## Convnet
 ```bash
 python train_convnet.py
 ```
