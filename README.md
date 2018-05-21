@@ -75,7 +75,7 @@ python perceptron_experiment.py
     --noise               Add noise
 
     ```
-- spilt_train_test.py - moves files from input dir to output but splits them between train and test dirs using ratio argument
+- spilt_train_test.py - moves files from input dir to output and splits them between train and test dirs using ratio argument
     ```
     usage: split_train_test.py [-h] [-ratio RATIO] [-i I] [-o O]
 
