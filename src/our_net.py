@@ -1,5 +1,5 @@
 import argparse
-import json
+import pickle
 
 from keras.layers import Dense, Conv2D, MaxPool2D, Flatten
 from keras.models import Sequential
@@ -62,10 +62,10 @@ if __name__ == '__main__':
 
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
                   metrics=['categorical_accuracy', 'top_k_categorical_accuracy'])
-    history = model.fit_generator(generator=train_generator, steps_per_epoch=64, epochs=64,
+    history = model.fit_generator(generator=train_generator, steps_per_epoch=64, epochs=256,
                     validation_data=test_generator, validation_steps=5)
 
-    with open(args.history, 'w') as f:
-        json.dump(history, f)
+    with open(args.history, 'wb') as f:
+        pickle.dump(history.history, f)
 
     model.save(args.model)
