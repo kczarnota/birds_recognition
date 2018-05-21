@@ -1,17 +1,26 @@
 import os
-from PIL import Image
+from PIL import Image, ImageDraw
 import argparse
-
+import shutil
 
 
 parser = argparse.ArgumentParser(description='SNR bounding box extraction and data argumentation.')
-parser.add_argument("i", help="Input dir")
-parser.add_argument("b", help="Bounding boxes file")
-parser.add_argument("o", help="Output dir")
-parser.add_argument("f", type=bool, help="Force overwrite")
+parser.add_argument("-i", help="Input dir")
+parser.add_argument("-b", help="Bounding boxes file")
+parser.add_argument("-o", help="Output dir")
+parser.add_argument("-f", default=False, required=False, action='store_true', help="Force overwrite")
+parser.add_argument("--debug", default=False, required=False, action='store_true', help="Debug mode")
+
 args = parser.parse_args()
 
 image_size = 224
+
+def draw_rectangle(draw, coordinates, color, width=1):
+    for i in range(width):
+        rect_start = (coordinates[0][0] - i, coordinates[0][1] - i)
+        rect_end = (coordinates[1][0] + i, coordinates[1][1] + i)
+        draw.rectangle((rect_start, rect_end), outline = color)
+
 
 def fit_bounding_box(image_size, orginal_bounding_box):
 #            if width != height:
@@ -75,11 +84,21 @@ def extract_bounding_boxes_from_images(bb_list, file_names, output_dir):
             orginal_image_file_name = os.path.join(path, f + ".jpg")
             img = Image.open(orginal_image_file_name)
             new_bb = fit_bounding_box(img.size, bb_list[f])
-            img2 = img.crop(new_bb)
-            img2 = img2.resize((image_size, image_size), Image.ANTIALIAS)
-            rgb_image = Image.new("RGB", img2.size)
-            rgb_image.paste(img2)
-            rgb_image.save(output_file_name)
+            if not args.debug:
+                img2 = img.crop(new_bb)
+                img2 = img2.resize((image_size, image_size), Image.ANTIALIAS)
+                rgb_image = Image.new("RGB", img2.size)
+                rgb_image.paste(img2)
+                rgb_image.save(output_file_name)
+            else:
+                rgb_image = Image.new("RGB", img.size)
+                rgb_image.paste(img)
+                draw = ImageDraw.Draw(rgb_image)
+                draw_rectangle(draw, [(new_bb[0], new_bb[1]), (new_bb[2], new_bb[3])], color=(255,0,0), width=5)
+                del draw
+                rgb_image.save(output_file_name)
+
+
         except Exception as e:
             print(e)
 
@@ -87,10 +106,15 @@ def extract_bounding_boxes_from_images(bb_list, file_names, output_dir):
 fn = collect_files_names(args.i)
 bb = load_bounding_boxes(args.b)
 
-if os.path.exists(directory):
+if os.path.exists(args.o):
     if not args.f:
         raise Exception("Output dir already exists")
+    else:
+        for root, dirs, files in os.walk(args.o):
+            for d in dirs:
+                shutil.rmtree(os.path.join(root, d))
 
-os.makedirs(args.o)
+else:
+    os.makedirs(args.o)
 
 extract_bounding_boxes_from_images(bb, fn, args.o)
