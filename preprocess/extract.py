@@ -15,10 +15,24 @@ parser.add_argument("--translate", default=0, required=False, type=int, help="Ho
 parser.add_argument("--rotate", default=0, required=False, type=int, help="How many times to do rotate argumentation")
 parser.add_argument("--translate-rotate", default=0, required=False, type=int, help="How many times to do translate + rotate argumentation")
 parser.add_argument("--debug", default=False, required=False, action='store_true', help="Debug mode")
-parser.add_argument("--square", default=False, required=False, action='store_true', help="Crop square")
+parser.add_argument("--square", default=True, required=False, action='store_true', help="Crop square")
+parser.add_argument("--noise", default=False, required=False, action='store_true', help="Add noise")
 args = parser.parse_args()
 
 image_size = 224
+
+def add_noise(image):
+    """Add gaussian noise to image"""
+    image_a = img_to_array(image)
+    row, col, ch= image_a.shape
+    mean = 256//2
+    var = 256//8
+    sigma = var**0.5
+    gauss = np.random.normal(mean,sigma,(row,col,ch))
+    gauss = gauss.reshape(row,col,ch)
+    image_a = image_a + gauss
+    image = array_to_img(image_a)
+    return image
 
 def draw_rectangle(draw, coordinates, color, width=1):
     for i in range(width):
@@ -139,6 +153,8 @@ def extract_bounding_boxes_from_images(bb_list, file_names, output_dir):
                 img2 = img2.resize((image_size, image_size), Image.ANTIALIAS)
                 rgb_image = Image.new("RGB", img2.size)
                 rgb_image.paste(img2)
+                if args.add_noise:
+                    rgb_image = add_noise(rgb_image)
                 rgb_image.save(output_file_name)
             else:
                 rgb_image = Image.new("RGB", img.size)
@@ -146,10 +162,9 @@ def extract_bounding_boxes_from_images(bb_list, file_names, output_dir):
                 draw = ImageDraw.Draw(rgb_image)
                 draw_rectangle(draw, [(new_bb[0], new_bb[1]), (new_bb[2], new_bb[3])], color=(255,0,0), width=5)
                 del draw
+                if args.add_noise:
+                    rgb_image = add_noise(rgb_image)
                 rgb_image.save(output_file_name)
-
-
-
 
 fn = collect_files_names(args.i)
 bb = load_bounding_boxes(args.b)
