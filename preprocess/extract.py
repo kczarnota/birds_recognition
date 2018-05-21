@@ -10,7 +10,7 @@ parser.add_argument("-b", help="Bounding boxes file")
 parser.add_argument("-o", help="Output dir")
 parser.add_argument("-f", default=False, required=False, action='store_true', help="Force overwrite")
 parser.add_argument("--debug", default=False, required=False, action='store_true', help="Debug mode")
-
+parser.add_argument("--square", default=False, required=False, action='store_true', help="Crop square")
 args = parser.parse_args()
 
 image_size = 224
@@ -23,24 +23,37 @@ def draw_rectangle(draw, coordinates, color, width=1):
 
 
 def fit_bounding_box(image_size, orginal_bounding_box):
-#            if width != height:
-#                if width > height:
-#                    bigger = width
-#                    diff = (width - height)//2
-#                    y -= diff
-#                    h += diff
-#                    new_height = h - y
-#                    if new_height != width:
-#                        h += abs(new_height - width)
-#                else:
-#                    bigger = height
-#                    diff = (height- width)//2
-#                    x -= diff
-#                    w += diff
-#                    new_width = w - x
-#                    if new_width != height:
-#                        w += abs(new_width - height)
-    return orginal_bounding_box
+    x, y, w, h = orginal_bounding_box
+
+    width = w - x
+    height = h - y
+
+    max_wh = max([width, height])
+
+    middle_x = x + width//2
+    middle_y = y + height//2
+
+    if args.square:
+        if middle_x - max_wh//2 < 0:
+            max_wh -= (max_wh//2 - middle_x)*2
+
+        if middle_x + max_wh//2 > image_size[0]:
+            max_wh -= ((max_wh//2 + middle_x) - image_size[0])*2 + 1
+
+        if middle_y - max_wh//2 < 0:
+            max_wh -= (max_wh//2 - middle_y)*2 + 1
+
+        if middle_y + max_wh//2 > image_size[1]:
+            max_wh -= ((max_wh//2 + middle_y) - image_size[1])*2 + 1
+
+    new_x = middle_x - max_wh//2
+    new_y = middle_y - max_wh//2
+
+    new_w = new_x + max_wh
+    new_h = new_y + max_wh
+
+    print(str((new_x, new_y, new_w, new_h)))
+    return (new_x, new_y, new_w, new_h)
 
 
 def load_bounding_boxes(file_name):
@@ -109,11 +122,6 @@ bb = load_bounding_boxes(args.b)
 if os.path.exists(args.o):
     if not args.f:
         raise Exception("Output dir already exists")
-    else:
-        for root, dirs, files in os.walk(args.o):
-            for d in dirs:
-                shutil.rmtree(os.path.join(root, d))
-
 else:
     os.makedirs(args.o)
 
