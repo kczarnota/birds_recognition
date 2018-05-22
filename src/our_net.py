@@ -5,6 +5,19 @@ from keras.layers import Dense, Conv2D, MaxPool2D, Flatten
 from keras.models import Sequential
 from tensorflow.python.keras._impl.keras.preprocessing.image import ImageDataGenerator
 
+def add_noise(image):
+    """Add gaussian noise to image"""
+    image_a = img_to_array(image)
+    row, col, ch= image_a.shape
+    mean = 0
+    var = 256//4
+    sigma = var**0.5
+    gauss = np.random.normal(mean,sigma,(row,col,ch))
+    gauss = gauss.reshape(row,col,ch)
+    image_a = image_a + gauss
+    image = array_to_img(image_a)
+    return image
+
 
 def get_model(num_classes):
     model = Sequential()
@@ -43,18 +56,24 @@ if __name__ == '__main__':
     parser.add_argument("-test", help="Path to test data")
     parser.add_argument("-history", help="File where to store history")
     parser.add_argument("-model", help="File where to store model")
+    parser.add_argument("-noise", help="Add noise to training images")
     args = parser.parse_args()
 
     model = get_model(50)
-    datagen = ImageDataGenerator()
 
-    train_generator = datagen.flow_from_directory(
+    if args.noise:
+        train_datagen = ImageDataGenerator(preprocessing_function=add_noise)
+    else
+        train_datagen = ImageDataGenerator()
+
+    train_generator = train_datagen.flow_from_directory(
         args.train,
         target_size=(224, 224),
         batch_size=16,
         class_mode='categorical')
 
-    test_generator = datagen.flow_from_directory(
+    test_datagen = ImageDataGenerator()
+    test_generator = test_datagen.flow_from_directory(
         args.test,
         target_size=(224, 224),
         batch_size=16,
