@@ -1,9 +1,11 @@
 import argparse
 import pickle
 
+import numpy as np
 from keras.layers import Dense, Conv2D, MaxPool2D, Flatten
 from keras.models import Sequential
-from tensorflow.python.keras._impl.keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator, img_to_array, array_to_img
+
 
 def add_noise(image):
     """Add gaussian noise to image"""
@@ -56,15 +58,19 @@ if __name__ == '__main__':
     parser.add_argument("-test", help="Path to test data")
     parser.add_argument("-history", help="File where to store history")
     parser.add_argument("-model", help="File where to store model")
-    parser.add_argument("-noise", help="Add noise to training images")
+    parser.add_argument('--noise', dest='noise', action='store_true', help="Add noise to training images")
+    parser.add_argument('--no-noise', dest='noise', action='store_false', help="Do not add noise to training images")
+    parser.set_defaults(noise=False)
     args = parser.parse_args()
 
     model = get_model(50)
 
     if args.noise:
         train_datagen = ImageDataGenerator(preprocessing_function=add_noise)
-    else
+        print('Using noise')
+    else:
         train_datagen = ImageDataGenerator()
+        print('Without noise')
 
     train_generator = train_datagen.flow_from_directory(
         args.train,
