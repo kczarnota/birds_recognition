@@ -56,14 +56,14 @@ if __name__ == '__main__':
     parser.add_argument("-test", help="Path to test data")
     parser.add_argument("-history", help="File where to store history")
     parser.add_argument("-model", help="File where to store model")
-    parser.add_argument("-noise", help="Add noise to training images")
+    parser.add_argument("-noise", default=False, action='store_true', help="Add noise to training images")
     args = parser.parse_args()
 
     model = get_model(50)
 
     if args.noise:
         train_datagen = ImageDataGenerator(preprocessing_function=add_noise)
-    else
+    else:
         train_datagen = ImageDataGenerator()
 
     train_generator = train_datagen.flow_from_directory(
