@@ -1,11 +1,10 @@
-from random import seed
 import argparse
 
-import numpy as np
-from keras.applications.resnet50 import ResNet50
-from keras.layers import Dense, GlobalAveragePooling2D
+from keras.applications.vgg16 import VGG16
+from keras.layers import Dense, Flatten
 from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator, img_to_array, array_to_img
+import pickle
 
 
 def BirdsResNet50(input_shape, classes_no, fine_tune=False):
@@ -18,10 +17,9 @@ def BirdsResNet50(input_shape, classes_no, fine_tune=False):
     :param fine_tune: If true, freezes all layers but the last one already added.
     :return: Neural network model.
     """
-    base_model = ResNet50(weights='imagenet', include_top=False, input_shape=input_shape)
+    base_model = VGG16(weights='imagenet', include_top=True, input_shape=input_shape)
 
-    x = base_model.output
-    x = GlobalAveragePooling2D()(x)
+    x = base_model.get_layer('fc2').output
     predictions = Dense(classes_no, activation='softmax')(x)
 
     model = Model(inputs=base_model.input, outputs=predictions)
@@ -41,6 +39,7 @@ if __name__ == '__main__':
     parser.add_argument("-model", help="File where to store model")
     args = parser.parse_args()
 
+    train_datagen = ImageDataGenerator()
     train_generator = train_datagen.flow_from_directory(
         args.train,
         target_size=(224, 224),
