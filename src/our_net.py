@@ -21,7 +21,7 @@ def add_noise(image):
     return image
 
 
-def get_model(num_classes):
+def get_model(num_classes, desc_size):
     model = Sequential()
 
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu', input_shape=(224, 224, 3)))
@@ -47,7 +47,7 @@ def get_model(num_classes):
     model.add(Flatten())
     model.add(Dense(256, activation='relu'))
     model.add(Dense(128, activation='relu'))
-    model.add(Dense(64, activation='relu'))
+    model.add(Dense(desc_size, activation='relu'))
     model.add(Dense(num_classes, activation='softmax'))
     return model
 
@@ -59,9 +59,11 @@ if __name__ == '__main__':
     parser.add_argument("-history", help="File where to store history")
     parser.add_argument("-model", help="File where to store model")
     parser.add_argument("-noise", default=False, action='store_true', help="Add noise to training images")
+    parser.add_argument("-desc_size", default=64, type=int, help="Descriptor size")
     args = parser.parse_args()
 
-    model = get_model(50)
+    model = get_model(50, args.desc_size)
+    print('Descriptor size ', args.desc_size)
 
     if args.noise:
         train_datagen = ImageDataGenerator(preprocessing_function=add_noise)
