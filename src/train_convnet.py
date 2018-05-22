@@ -1,4 +1,5 @@
 from random import seed
+import argparse
 
 import numpy as np
 from keras.applications.resnet50 import ResNet50
@@ -6,41 +7,6 @@ from keras.layers import Dense, GlobalAveragePooling2D
 from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator, img_to_array, array_to_img
 
-#from src.data_management import BirdsDataManager, BirdsDataGenerator
-
-def add_noise(image):
-    """Add gaussian noise to image"""
-    image_a = img_to_array(image)
-    row, col, ch= image_a.shape
-    mean = 256//2
-    var = 256//8
-    sigma = var**0.5
-    gauss = np.random.normal(mean,sigma,(row,col,ch))
-    gauss = gauss.reshape(row,col,ch)
-    image_a = image_a + gauss
-    image = array_to_img(image_a)
-    return image
-
-datagen = ImageDataGenerator(
-    rotation_range=5,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
-    preprocessing_function=add_noise,
-    horizontal_flip=True)
-
-train_generator = datagen.flow_from_directory(
-        '../data/split/train/',
-        target_size=(224, 224),
-        batch_size=1,
-        class_mode='categorical')
-
-test_datagen = ImageDataGenerator()
-
-test_generator = datagen.flow_from_directory(
-        '../data/split/test/',
-        target_size=(224, 224),
-        batch_size=1,
-        class_mode='categorical')
 
 def BirdsResNet50(input_shape, classes_no, fine_tune=False):
     """
@@ -67,24 +33,36 @@ def BirdsResNet50(input_shape, classes_no, fine_tune=False):
     return model
 
 
-#root_directory = '../data/SET_A'
-root_directory = '../data/BBPP'
-
 if __name__ == '__main__':
-    np.random.seed(4)
-    seed(5)
+    parser = argparse.ArgumentParser(description='Train our network')
+    parser.add_argument("-train", help="Path to train data")
+    parser.add_argument("-test", help="Path to test data")
+    parser.add_argument("-history", help="File where to store history")
+    parser.add_argument("-model", help="File where to store model")
+    args = parser.parse_args()
 
-    #birds_data_manager = BirdsDataManager(root_directory)
+    train_generator = train_datagen.flow_from_directory(
+        args.train,
+        target_size=(224, 224),
+        batch_size=16,
+        class_mode='categorical')
 
-    #train_data, test_data = birds_data_manager.get_train_test_dataset(train_size=0.8, random_state=143)
-
-    #test_generator = BirdsDataGenerator(test_data)
+    test_datagen = ImageDataGenerator()
+    test_generator = test_datagen.flow_from_directory(
+        args.test,
+        target_size=(224, 224),
+        batch_size=16,
+        class_mode='categorical')
 
     model = BirdsResNet50(input_shape=(224, 224, 3), classes_no=50,
                           fine_tune=True)
 
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
                   metrics=['categorical_accuracy', 'top_k_categorical_accuracy'])
-    model.fit_generator(generator=train_generator, steps_per_epoch=20, epochs=20, validation_data=test_generator)
+    history = model.fit_generator(generator=train_generator, steps_per_epoch=64, epochs=256,
+                    validation_data=test_generator, validation_steps=5)
 
-    model.save('birdsmodel_bounding.h5')
+    with open(args.history, 'wb') as f:
+        pickle.dump(history.history, f)
+
+    model.save(args.model)
