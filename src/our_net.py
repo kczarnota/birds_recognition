@@ -2,7 +2,7 @@ import argparse
 import pickle
 
 import numpy as np
-from keras.layers import Dense, Conv2D, MaxPool2D, Flatten
+from keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout
 from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator, img_to_array, array_to_img
 
@@ -21,28 +21,39 @@ def add_noise(image):
     return image
 
 
-def get_model(num_classes, desc_size):
+def get_model(num_classes, desc_size, dropout):
     model = Sequential()
 
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu', input_shape=(224, 224, 3)))
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu'))
     model.add(MaxPool2D(pool_size=(2, 2)))
+    if dropout:
+        model.add(Dropout(dropout))
 
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu'))
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu'))
     model.add(MaxPool2D(pool_size=(2, 2)))
+    if dropout:
+        model.add(Dropout(dropout))
 
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu'))
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu'))
     model.add(MaxPool2D(pool_size=(2, 2)))
+    if dropout:
+        model.add(Dropout(dropout))
 
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu'))
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu'))
     model.add(MaxPool2D(pool_size=(2, 2)))
+    if dropout:
+        model.add(Dropout(dropout))
 
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu'))
     model.add(Conv2D(filters=50, kernel_size=(3, 3), activation='relu'))
     model.add(MaxPool2D(pool_size=(2, 2)))
+    if dropout:
+        model.add(Dropout(dropout))
+
 
     model.add(Flatten())
     model.add(Dense(256, activation='relu'))
@@ -60,10 +71,13 @@ if __name__ == '__main__':
     parser.add_argument("-model", help="File where to store model")
     parser.add_argument("-noise", default=False, action='store_true', help="Add noise to training images")
     parser.add_argument("-desc_size", default=64, type=int, help="Descriptor size")
+    parser.add_argument("-dropout", default=None, type=float, help="Add dropout")
     args = parser.parse_args()
 
-    model = get_model(50, args.desc_size)
+    model = get_model(50, args.desc_size, args.dropout)
     print('Descriptor size ', args.desc_size)
+    if args.dropout:
+        print('Using dropout ', args.dropout)
 
     if args.noise:
         train_datagen = ImageDataGenerator(preprocessing_function=add_noise)
