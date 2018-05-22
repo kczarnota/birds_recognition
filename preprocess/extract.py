@@ -106,23 +106,23 @@ def do_argumentation(img, box):
     bb.append(box)
 
     for i in range(args.translate):
-        vec = (randint(1, 30), randint(1, 30))
+        vec = (randint(-30, 30), randint(-30, 30))
         #import ipdb; ipdb.set_trace()
         new_bb = (box[0] + vec[0], box[1] + vec[1], box[2] + vec[0], box[3] + vec[1])
         images.append(img)
         bb.append(new_bb)
 
     for i in range(args.rotate):
-        angle = random.uniform(0.1, 5)
+        angle = random.uniform(-5, 5)
         ni = img.copy()
         ni = ni.rotate(angle)
         images.append(ni)
         bb.append(box)
 
     for i in range(args.translate_rotate):
-        angle = random.uniform(0.1, 5)
+        angle = random.uniform(-5, 5)
         ni = img.rotate(angle)
-        vec = (randint(1, 30), randint(1, 30))
+        vec = (randint(-30, 30), randint(-30, 30))
         new_bb = (box[0] + vec[0], box[1] + vec[1], box[2] + vec[0], box[3] + vec[1])
         images.append(ni)
         bb.append(new_bb)
