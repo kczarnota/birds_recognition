@@ -58,9 +58,7 @@ if __name__ == '__main__':
     parser.add_argument("-test", help="Path to test data")
     parser.add_argument("-history", help="File where to store history")
     parser.add_argument("-model", help="File where to store model")
-    parser.add_argument('--noise', dest='noise', action='store_true', help="Add noise to training images")
-    parser.add_argument('--no-noise', dest='noise', action='store_false', help="Do not add noise to training images")
-    parser.set_defaults(noise=False)
+    parser.add_argument("-noise", default=False, action='store_true', help="Add noise to training images")
     args = parser.parse_args()
 
     model = get_model(50)
