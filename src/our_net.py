@@ -5,6 +5,7 @@ import numpy as np
 from keras.layers import Dense, Conv2D, MaxPool2D, Flatten, Dropout
 from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator, img_to_array, array_to_img
+from keras.callbacks import EarlyStopping
 
 
 def add_noise(image):
@@ -101,8 +102,9 @@ if __name__ == '__main__':
 
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
                   metrics=['categorical_accuracy', 'top_k_categorical_accuracy'])
+    early_stopping = EarlyStopping(monitor='val_acc', patience=5)
     history = model.fit_generator(generator=train_generator, steps_per_epoch=64, epochs=256,
-                    validation_data=test_generator, validation_steps=5)
+                    validation_data=test_generator, validation_steps=5, callbacks=[early_stopping])
 
     with open(args.history, 'wb') as f:
         pickle.dump(history.history, f)
