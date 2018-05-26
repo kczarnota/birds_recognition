@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-PARAMETERS = [[30], [10, 20], [5, 10, 15], [3, 6, 9, 12], [2, 4, 5, 8, 10]]
+PARAMETERS = [[30], [10, 20], [5, 10, 15], [3, 6, 9, 12], [2, 4, 6, 8, 10]]
 
 
 def load_data(train_ratio=0.9, valid_ratio=0.1):
