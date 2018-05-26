@@ -3,9 +3,12 @@ from numpy import genfromtxt
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt
+from sklearn import preprocessing
 
 def load_data(csv_data_file_name, train_ratio=0.8):
     array = genfromtxt(csv_data_file_name, delimiter=',')
+    array_scaled_values = preprocessing.scale(array[:, :-1])
+    array = np.column_stack((array_scaled_values, array[:, -1]))
     class_labels = np.unique(array[:,-1].astype(np.int32))
     print("Data loading done")
     print("Loaded {} samples splitted into {} classes".format(array.shape[0], class_labels.shape[0]))
@@ -43,16 +46,17 @@ def load_data(csv_data_file_name, train_ratio=0.8):
 parser = argparse.ArgumentParser(description='Train SVM classifier')
 parser.add_argument("-i", required=True, help="Path to data")
 parser.add_argument("-r", default=0.8, type=float, help="Train/Test split ratio")
-parser.add_argument("-d", default=1, type=int, help="SVM Poly kernel degree")
 
 args = parser.parse_args()
 
 train_x, train_y, test_x, test_y = load_data(args.i, args.r)
 
 #this is SVM one-vs-one classifier
-clf = svm.SVC(kernel='poly', degree=args.d)
-clf.fit(train_x, train_y)
-print(clf.score(train_x, train_y))
-print(clf.score(test_x, test_y))
+for deg in range(1,6):
+    print(deg)
+    clf = svm.SVC(kernel='poly', degree=deg)
+    clf.fit(train_x, train_y)
+    print("Train: {0:.4f}".format(clf.score(train_x, train_y)))
+    print("Test: {0:.4f}".format(clf.score(test_x, test_y)))
 
 

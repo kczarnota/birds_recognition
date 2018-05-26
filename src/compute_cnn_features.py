@@ -51,7 +51,7 @@ for root, subdirs, files in os.walk(args.i):
 
             arr = img_to_array(rgb)
             intermediate_output = intermediate_layer_model.predict(np.array([arr]))
-            intermediate_output = normalize(intermediate_output.flatten())
+            intermediate_output = intermediate_output.flatten()
             intermediate_output = intermediate_output.tolist()
             csv_line = ",".join([str(i) for i in intermediate_output]) + "," + str(cls_id)
             print(csv_line)
