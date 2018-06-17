@@ -32,7 +32,7 @@ def BirdsResNet50(input_shape, classes_no, fine_tune=False):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Train our network')
+    parser = argparse.ArgumentParser(description='Finetune VGG16')
     parser.add_argument("-train", help="Path to train data")
     parser.add_argument("-test", help="Path to test data")
     parser.add_argument("-history", help="File where to store history")

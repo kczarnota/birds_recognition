@@ -1,4 +1,35 @@
 # SNR Project - recognizing birds
+The goal of this project was to test different approaches of image classification.
+
+## Dataset
+* 3000 images of birds
+* 50 classes
+* different resolutions
+* images in sRGB color space
+* JPEG files
+* whole dataset - 600MB
+
+Example images
+![](images/example_birds.png)
+
+## Experiments
+The project was divided into 4 parts:
+1. BSIF features and perceptron
+    - constant number of neurons, dividing them into 1-5 layers
+2. VGG16 with imagenet weights and finetuning on our data
+3. Our architecture proposition trained using data augmentation
+    - rotation (-5°,+5°)
+    - translation (-30, +30 in x and y)
+    - rotations + translations
+    - add noise
+    - add dropout
+    - try early stopping
+    - different descriptor sizes
+4. SVM on features extracted from our network
+
+## Results
+![](images/birds_results.png)
+
 ## Setup
 We're providing requirements.txt file, which can be used to prepare environment using virtualenv on conda
 
@@ -21,7 +52,7 @@ sudo apt-get octave liboctave-dev
 octave-cli
 pkg install -forge image
 ```
-## Perceptron experiment
+## Perceptron
 Put SET_A and bounding_boxes.txt in data directory
 
 ```bash
@@ -37,6 +68,67 @@ python mat2csv.py bsifhistnorm_features_rgb_cube.mat > bsifhistnorm_features_rgb
 # from src
 python perceptron_experiment.py
 ```
+
+## VGG16 finetuning
+- train_convnet.py
+   ```
+   usage: train_convnet.py [-h] [-train TRAIN] [-test TEST] [-history HISTORY]
+                        [-model MODEL]
+
+   Finetune VGG16
+
+   optional arguments:
+   -h, --help        show this help message and exit
+   -train TRAIN      Path to train data
+   -test TEST        Path to test data
+   -history HISTORY  File where to store history
+   -model MODEL      File where to store model
+   ```
+
+## Our network training
+- our_net.py
+   ```
+   usage: our_net.py [-h] [-train TRAIN] [-test TEST] [-history HISTORY]
+                  [-model MODEL] [-noise] [-desc_size DESC_SIZE]
+                  [-dropout DROPOUT]
+
+   Train our network
+
+  optional arguments:
+  -h, --help            show this help message and exit
+  -train TRAIN          Path to train data
+  -test TEST            Path to test data
+  -history HISTORY      File where to store history
+  -model MODEL          File where to store model
+  -noise                Add noise to training images
+  -desc_size DESC_SIZE  Descriptor size
+  -dropout DROPOUT      Add dropout
+
+   ```
+
+## SVM
+- compute_cnn_features.py
+   ```
+  usage: compute_cnn_features.py [-h] -m M -i I
+
+  Compute CNN features from last layer
+
+  optional arguments:
+  -h, --help  show this help message and exit
+  -m M        Path to model
+  -i I        Dir containig images for features computation
+   ```
+
+- svm.py
+   ```
+  Train SVM classifier
+
+  optional arguments:
+  -h, --help  show this help message and exit
+  -i I        Path to data
+  -r R        Train/Test split ratio
+   ```
+
 
 ## Preprocessing scripts
 
@@ -88,8 +180,3 @@ python perceptron_experiment.py
     -o O          Output dir
 
     ```
-
-## Convnet
-```bash
-python train_convnet.py
-```

@@ -17,7 +17,7 @@ def normalize(v):
 
 parser = argparse.ArgumentParser(description='Compute CNN features from last layer')
 parser.add_argument("-m", required=True, help="Path to model")
-parser.add_argument("-i", required=True, help="Dir containig images for feautres computation")
+parser.add_argument("-i", required=True, help="Dir containig images for features computation")
 
 args = parser.parse_args()
 
